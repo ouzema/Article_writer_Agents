@@ -482,7 +482,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Your Name** - _Initial work_ - Designing Agentic Systems Project
+- **Your Name** - ouzema - Designing Agentic Systems Project
 
 ---
 
