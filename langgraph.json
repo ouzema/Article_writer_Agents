@@ -1,0 +1,10 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": "./src/react_agent/content_workflow_graph.py:content_workflow_graph"
+  },
+  "env": ".env"
+}
