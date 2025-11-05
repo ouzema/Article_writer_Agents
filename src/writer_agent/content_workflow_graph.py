@@ -2,22 +2,21 @@
 
 from typing import Literal
 
-from langgraph.graph import StateGraph, START, END
-from langgraph.types import Command
+from langgraph.graph import END, START, StateGraph
 
-from writer_agent.context import Context
-from writer_agent.content_workflow_state import State, InputState, OutputState
 from writer_agent.content_workflow_nodes import (
-    orchestrator_node,
-    basic_llm_response_node,
     analyzer_collector_node,
-    plan_writer_node,
-    draft_writer_node,
+    basic_llm_response_node,
     critic_agent_node,
-    human_feedback_draft_node,
-    save_to_db_node,
+    draft_writer_node,
     final_drafter_node,
+    human_feedback_draft_node,
+    orchestrator_node,
+    plan_writer_node,
+    save_to_db_node,
 )
+from writer_agent.content_workflow_state import InputState, OutputState, State
+from writer_agent.context import Context
 
 
 def route_orchestrator(state: State) -> Literal["basic_llm_response", "analyzer_collector"]:
@@ -93,7 +92,8 @@ builder.add_edge("critic_agent", "human_feedback_draft")
 # Add a pass-through path so LangGraph knows these nodes are reachable
 def route_human_feedback(state: State) -> str:
     """Dummy router - actual routing done by Command in node.
-    This ensures save_to_db is recognized as reachable."""
+    This ensures save_to_db is recognized as reachable.
+    """
     # This won't actually be called since node returns Command
     return "save_to_db"
 

@@ -53,6 +53,12 @@ lint.ignore = [
     # Relax the convention by _not_ requiring documentation for every function parameter.
     "D417",
     "E501",
+    # Allow print statements for user feedback
+    "T201",
+    # Relax docstring formatting requirements
+    "D200",  # One-line docstring should fit on one line
+    "D205",  # 1 blank line required between summary line and description
+    "D401",  # First line should be in imperative mood
 ]
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D", "UP"]

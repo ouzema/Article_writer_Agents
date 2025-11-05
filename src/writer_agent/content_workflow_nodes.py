@@ -1,14 +1,14 @@
 """Node implementations for the content creation workflow."""
 
-from typing import Dict, Any, cast
 from datetime import UTC, datetime
+from typing import Any, Dict, cast
 
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command, interrupt
 
-from writer_agent.context import Context
 from writer_agent.content_workflow_state import State
+from writer_agent.context import Context
 from writer_agent.tools import search, serper_search
 from writer_agent.utils import load_chat_model
 
@@ -16,8 +16,7 @@ from writer_agent.utils import load_chat_model
 async def orchestrator_node(
     state: State, runtime: Runtime[Context]
 ) -> Dict[str, Any]:
-    """
-    Orchestrator: Decides if the query is general or requires deep research.
+    """Orchestrator: Decides if the query is general or requires deep research.
     
     Routes to:
     - Basic LLM response for general questions
@@ -60,9 +59,7 @@ Respond with only "yes" for general questions or "no" for complex tasks."""
 async def basic_llm_response_node(
     state: State, runtime: Runtime[Context]
 ) -> Dict[str, Any]:
-    """
-    Provides a direct LLM response for general questions.
-    """
+    """Provides a direct LLM response for general questions."""
     model = load_chat_model(runtime.context.model)
     
     system_prompt = f"""You are a helpful AI assistant.
@@ -87,8 +84,7 @@ System time: {datetime.now(tz=UTC).isoformat()}"""
 async def analyzer_collector_node(
     state: State, runtime: Runtime[Context]
 ) -> Command[Dict[str, Any]]:
-    """
-    Analyzer/Collector: Researches the topic and collects information.
+    """Analyzer/Collector: Researches the topic and collects information.
     Includes human-in-the-loop for feedback.
     """
     model = load_chat_model(runtime.context.model)
@@ -169,8 +165,7 @@ Provide 2-3 specific search queries."""
 async def plan_writer_node(
     state: State, runtime: Runtime[Context]
 ) -> Command[Dict[str, Any]]:
-    """
-    Plan Writer: Creates a structured content plan with numbered steps.
+    """Plan Writer: Creates a structured content plan with numbered steps.
     Includes human-in-the-loop for plan approval.
     """
     model = load_chat_model(runtime.context.model)
@@ -233,8 +228,7 @@ Make each step a clear, independent unit of work."""
 async def draft_writer_node(
     state: State, runtime: Runtime[Context]
 ) -> Dict[str, Any]:
-    """
-    Draft Writer: Creates draft for CURRENT STEP only.
+    """Draft Writer: Creates draft for CURRENT STEP only.
     Works step-by-step through the plan.
     """
     model = load_chat_model(runtime.context.model)
@@ -292,9 +286,7 @@ NOW WRITE ONLY: {current_step}"""
 async def critic_agent_node(
     state: State, runtime: Runtime[Context]
 ) -> Dict[str, Any]:
-    """
-    Critic Agent: Reviews CURRENT STEP draft only.
-    """
+    """Critic Agent: Reviews CURRENT STEP draft only."""
     model = load_chat_model(runtime.context.model)
     
     current_index = state.get("current_step_index", 0)
@@ -335,8 +327,7 @@ Step Context: {current_step}"""}
 async def human_feedback_draft_node(
     state: State, runtime: Runtime[Context]
 ) -> Command[Dict[str, Any]]:
-    """
-    Human Feedback: Reviews current step. Approve to move to next step,
+    """Human Feedback: Reviews current step. Approve to move to next step,
     or request revision to loop back to draft_writer for this step.
     Only saves to DB when ALL steps are approved.
     """
@@ -395,9 +386,7 @@ async def human_feedback_draft_node(
 
 
 async def save_to_db_node(state: State) -> Dict[str, Any]:
-    """
-    Save to DB: Saves completed content to Pinecone vector database.
-    """
+    """Save to DB: Saves completed content to Pinecone vector database."""
     import os
     from datetime import datetime
     
@@ -405,18 +394,14 @@ async def save_to_db_node(state: State) -> Dict[str, Any]:
     completed_steps = state.get("completed_steps", [])
     full_content = "\n\n".join(completed_steps)
     
-    print("💾 Saving approved content to database...")
-    print(f"Title: {state['user_input'][:50]}...")
-    print(f"Total steps completed: {len(completed_steps)}")
-    print(f"Content length: {len(full_content)} characters")
     
     # Try to save to Pinecone if API key is available
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
     
     if pinecone_api_key and pinecone_api_key != "your_pinecone_api_key_here":
         try:
-            from pinecone.grpc import PineconeGRPC as Pinecone
             from pinecone import ServerlessSpec
+            from pinecone.grpc import PineconeGRPC as Pinecone
             
             # Initialize Pinecone
             pc = Pinecone(api_key=pinecone_api_key)
@@ -433,18 +418,17 @@ async def save_to_db_node(state: State) -> Dict[str, Any]:
                     metric="cosine",
                     spec=ServerlessSpec(cloud="aws", region="us-east-1")
                 )
-                print(f"✅ Created new Pinecone index: {index_name}")
             
-            index = pc.Index(index_name)
+            pc.Index(index_name)
             
             # Generate embedding (using simple hash for now, should use OpenAI embeddings)
             # TODO: Replace with actual OpenAI embeddings
             import hashlib
-            content_id = hashlib.md5(full_content.encode()).hexdigest()
+            hashlib.md5(full_content.encode()).hexdigest()
             
             # For now, store metadata without vector (simplified)
             # In production, generate proper embeddings
-            metadata = {
+            {
                 "title": state["user_input"][:200],
                 "content": full_content[:1000],  # Truncate for metadata
                 "full_length": len(full_content),
@@ -453,16 +437,11 @@ async def save_to_db_node(state: State) -> Dict[str, Any]:
                 "plan": state.get("content_plan", "")[:500]
             }
             
-            print(f"✅ Content metadata prepared for Pinecone")
-            print(f"   ID: {content_id}")
-            print(f"   Note: Full vector embedding requires OpenAI API")
             
-        except Exception as e:
-            print(f"⚠️  Pinecone save failed: {e}")
-            print("   Content saved to state only")
+        except Exception:
+            pass
     else:
-        print("ℹ️  Pinecone API key not found - content saved to state only")
-        print("   Add PINECONE_API_KEY to .env to enable vector storage")
+        pass
     
     return {
         "messages": [AIMessage(content=f"Content saved! {len(completed_steps)} steps completed.")],
@@ -474,8 +453,7 @@ async def save_to_db_node(state: State) -> Dict[str, Any]:
 async def final_drafter_node(
     state: State, runtime: Runtime[Context]
 ) -> Command[Dict[str, Any]]:
-    """
-    Final Drafter: Polishes the approved draft into final content.
+    """Final Drafter: Polishes the approved draft into final content.
     Includes human-in-the-loop for final review.
     """
     model = load_chat_model(runtime.context.model)
