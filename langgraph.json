@@ -4,7 +4,7 @@
     "."
   ],
   "graphs": {
-    "agent": "./src/react_agent/content_workflow_graph.py:content_workflow_graph"
+    "agent": "./src/writer_agent/content_workflow_graph.py:content_workflow_graph"
   },
   "env": ".env"
 }
