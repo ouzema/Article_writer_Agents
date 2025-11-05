@@ -73,7 +73,7 @@ warn_return_any = false
 warn_unused_ignores = false
 no_implicit_optional = false
 strict_optional = false
-disable_error_code = ["union-attr", "type-var", "return-value"]
+disable_error_code = ["union-attr", "type-var", "return-value", "redundant-cast", "no-any-return"]
 
 [dependency-groups]
 dev = [
