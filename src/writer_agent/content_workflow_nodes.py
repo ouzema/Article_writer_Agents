@@ -7,10 +7,10 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command, interrupt
 
-from react_agent.context import Context
-from react_agent.content_workflow_state import State
-from react_agent.tools import search, serper_search
-from react_agent.utils import load_chat_model
+from writer_agent.context import Context
+from writer_agent.content_workflow_state import State
+from writer_agent.tools import search, serper_search
+from writer_agent.utils import load_chat_model
 
 
 async def orchestrator_node(

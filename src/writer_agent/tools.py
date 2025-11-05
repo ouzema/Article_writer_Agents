@@ -13,7 +13,7 @@ import httpx
 from langchain_tavily import TavilySearch
 from langgraph.runtime import get_runtime
 
-from react_agent.context import Context
+from writer_agent.context import Context
 
 
 async def search(query: str) -> Optional[dict[str, Any]]:

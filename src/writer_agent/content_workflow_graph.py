@@ -5,9 +5,9 @@ from typing import Literal
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command
 
-from react_agent.context import Context
-from react_agent.content_workflow_state import State, InputState, OutputState
-from react_agent.content_workflow_nodes import (
+from writer_agent.context import Context
+from writer_agent.content_workflow_state import State, InputState, OutputState
+from writer_agent.content_workflow_nodes import (
     orchestrator_node,
     basic_llm_response_node,
     analyzer_collector_node,
